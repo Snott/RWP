@@ -18,16 +18,16 @@
 % началное условия вычисляется методом ГО
 
 % Пусть дельта функция на высоте h
-h = 10;
-dh= 1;
+% h = 10;
+% dh= 1;
 
 % Шаг по высоте и дальности
 dx = 0.01;
-dz = 0.1;
+dz = 0.00001;
 
 % Максимальная высота
 % Xmax = 100;
-logHeight = 10;
+logHeight = 11;
 discretXmax = 2^logHeight;
 Xmax = (discretXmax-1) * dx;
 x = linspace(0, Xmax, discretXmax);
@@ -39,7 +39,7 @@ x = linspace(0, Xmax, discretXmax);
 % u = x==h; % dst
 % u = abs (  ( x > (h - dh) ) & ( x < (h + dh) )  ); 
 % u = ones( size(x) ); % dct
-z = 1; Hprd = 4;
+z = 500; Hprd = 4;
 lamda=3e-2;
 k0=2*pi/lamda;
 DDNprd = 5;
@@ -79,7 +79,7 @@ K = exp(-1i*pi^2*p.^2*dz/2/k0);
 figure(1)
 hold off
 grid on
-IImax = 500;
+IImax =500;
 AllColor = jet(IImax);
  for ii = 1: IImax;
 % Синус-Фурье преобразование
@@ -97,12 +97,13 @@ U1 = U.*K;
 % обратный Фурье
  u1 = idst (U1);
 %  u1 = idct (U1);
- alfa = -1e-3;
+ alfa = -1e-0;
  Hgu = 0.8 * Xmax;
  
  REFR= (-1i*k0*n2 + k0*alfa*(x-Hgu).^2.*(x>=Hgu) )/2;
 % REFR = 0;
  u = u1 .* exp(dz*REFR);
+ u(1)=0;
  if ~mod(ii,10)
  plot ( x,( abs(u)./sqrt(dz*ii) ),'color',AllColor(ii,:));%sqrt(dz*ii) ) %20*log10
 % ylim([-100 -20])
