@@ -1,0 +1,55 @@
+﻿<html>
+<head> 
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0px; padding: 0px }
+  #map_canvas { height: 100% }
+</style>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript">
+  function initialize() {
+    var moscow = new google.maps.LatLng(55.885, 37.30);
+    var myOptions = {
+      zoom: 12,
+      center: moscow,
+	  mapTypeId: google.maps.MapTypeId.ROADMAP
+	  }
+    var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+   var paths = [new google.maps.LatLng(55.913644, 37.334597),
+                new google.maps.LatLng(55.916139, 37.345411),
+                new google.maps.LatLng(55.91373, 37.363407),
+                new google.maps.LatLng(55.833775, 37.47533),
+                new google.maps.LatLng(55.818935, 37.381947),
+                new google.maps.LatLng(55.875672, 37.353451),
+                new google.maps.LatLng(55.883597, 37.346928),
+                new google.maps.LatLng(55.89152, 37.346098)];
+
+            var shape = new google.maps.Polygon({
+                paths: paths,
+                strokeColor: '#00FF00',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#00FF00',
+                fillOpacity: 0.35
+            });
+
+            shape.setMap(map);
+        }
+navigator.geolocation.getCurrentPosition(
+    function(position) {
+	    alert('координаты и высота ' +
+		    position.coords.latitude + ", " + position.coords.longitude +
+		", " +position.coords.altitude);
+	}
+);
+GEvent.addListener(map, "mousemove", function( latlng ){
+   var lat=latlng.lat(),
+       lng=latlng.lng();
+    alert([ lat, lng ]);
+	});
+</script>
+</head>
+<body onload="initialize()">
+  <div id="map_canvas"> </div>
+</body>
+</html>

@@ -1,55 +1,50 @@
 ﻿<html>
-<head> 
-<style type="text/css">
-  html { height: 100% }
-  body { height: 100%; margin: 0px; padding: 0px }
-  #map_canvas { height: 100% }
-</style>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
-<script type="text/javascript">
-  function initialize() {
-    var moscow = new google.maps.LatLng(55.885, 37.30);
-    var myOptions = {
-      zoom: 12,
-      center: moscow,
-	  mapTypeId: google.maps.MapTypeId.ROADMAP
-	  }
-    var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-   var paths = [new google.maps.LatLng(55.913644, 37.334597),
-                new google.maps.LatLng(55.916139, 37.345411),
-                new google.maps.LatLng(55.91373, 37.363407),
-                new google.maps.LatLng(55.833775, 37.47533),
-                new google.maps.LatLng(55.818935, 37.381947),
-                new google.maps.LatLng(55.875672, 37.353451),
-                new google.maps.LatLng(55.883597, 37.346928),
-                new google.maps.LatLng(55.89152, 37.346098)];
+  <head>
+    <style type="text/css">
+      html, body { height: 100%; margin: 0; padding: 0; }
+      #map { height: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script type="text/javascript">
+	
+function initMap() {
+ var map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat:55.81, lng:37.56 },
+    zoom:10,
+	mapTypeId: 'terrain'
+  });
+  var elevator = new google.maps.ElevationService;
+  var infowindow = new google.maps.InfoWindow({map: map});
+	map.addListener('click', function(event) {
+    displayLocationElevation(event.latLng, elevator, infowindow);
+  });
+}
+   function displayLocationElevation(location, elevator, infowindow) {
+  // Initiate the location request
+  elevator.getElevationForLocations({
+    'locations': [location]
+  }, function(results, status) {
+    infowindow.setPosition(location);
+    if (status === google.maps.ElevationStatus.OK) {
+      // Retrieve the first result
+      if (results[0]) {
+        // Open the infowindow indicating the elevation at the clicked position.
+        infowindow.setContent('укп <p> воол The elevation at this point <br>is ' +
+            results[0].elevation + ' meters' +  '<br> lat '+ location.lat() + '<br> lng '+ location.lng());
+      } else {
+        infowindow.setContent('No results found');
+      }
+    } else {
+      infowindow.setContent('Elevation service failed due to: ' + status);
+    }
+  });
+}
 
-            var shape = new google.maps.Polygon({
-                paths: paths,
-                strokeColor: '#00FF00',
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: '#00FF00',
-                fillOpacity: 0.35
-            });
-
-            shape.setMap(map);
-        }
-navigator.geolocation.getCurrentPosition(
-    function(position) {
-	    alert('координаты и высота ' +
-		    position.coords.latitude + ", " + position.coords.longitude +
-		", " +position.coords.altitude);
-	}
-);
-GEvent.addListener(map, "mousemove", function( latlng ){
-   var lat=latlng.lat(),
-       lng=latlng.lng();
-    alert([ lat, lng ]);
-	});
-</script>
-</head>
-<body onload="initialize()">
-  <div id="map_canvas"> </div>
-</body>
+   </script>
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFjfRE9qhV75VmLtbluNJL3QPsn_6v1Ps&callback=initMap">
+    </script>
+  </body>
 </html>
