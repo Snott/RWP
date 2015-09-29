@@ -76,14 +76,16 @@ function SPE
         %  u1 = ifft (U1);
 
     % затухание в поглощающем слое    
-        alfa = -5e-3/ii/dz;
-        Hgu = 0.8 * Xmax;
+%         alfa = -5e-3/ii/dz;
+%         Hgu = 0.8 * Xmax;
+        alfa = -5e-2/ii/dz;
+        Hgu = 0.75 * Xmax;
  
         REFR= ( -1i*k0*n2 + k0*alfa*(x-Hgu).^2.*(x>=Hgu) )/2;
 
     % окончательное поле ѕ” (без учета sqrt(r) )
         
-        u = u1 .* exp(dz*REFR);
+        u = u1 .* exp(dz*REFR); % мб затухание по cos 
         
     % вывод на рисунок каждой 10 итерации
     if ( ~mod(ii+(z/dz), dII) ) || (ii == IImax)  || (ii == 1)
@@ -98,6 +100,7 @@ function SPE
 %         plot ( x, abs( goE - dstE) ,'k');%go
         grid on
         title([num2str(curZ),' м'])
+        xlim([x(1),x(end)])
         drawnow
     end
  end
