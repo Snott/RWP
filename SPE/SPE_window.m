@@ -102,6 +102,8 @@ end
 
 function MW = CreatePanelNomber1(MW, CounterPB)
 % много повторов нужен метод
+% MW.PG{CounterPB}.CounterUic = 0;
+% MW = newUic(MW, CounterPB)
 CounterUic = 0;
 CounterUic = CounterUic + 1;
  MW.PG{CounterPB}.text1 = ...
