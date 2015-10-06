@@ -1,6 +1,17 @@
 function SPE_window
-name = 'SPE v0.1';
+name = 'SPE v0.1.0016';
+%% <--- сюда отдельную функцию с параметрами окна:
+% размер, цвет и пр.
 MW = OpenMW(name);
+SaveTemp(MW);
+
+function closeSPE(name)
+nh = get(0,'children');
+for ii = 1 : length(nh)
+    if strcmp ( get(nh(ii),'name' ), name )
+        close(nh(ii))
+    end
+end
 
 function MW = OpenMW(name)
 closeSPE(name)
@@ -15,12 +26,12 @@ MW = PanelPB(MW);
 MW.CounterPB = 0;
 MW.CounterUicEdit = 0;
 %% <--- кнопки боковой панели
-namePB = 'new';
+namePB = 'Расчет';
     MW = NewPB(MW,namePB);
     MW = CreatePanelNomber1(MW,MW.CounterPB);
-namePB = 'new2';
+namePB = 'Пост обработка';
     MW = NewPB(MW,namePB);
-namePB = 'new3';
+namePB = 'Рисунки';
     MW = NewPB(MW,namePB);
 %%   
 SetActivePG(0,0,MW, 1)
@@ -93,24 +104,24 @@ for ii = 1:MW.CounterPB
     set(MW.PB{ii}.handle,'Callback', {@SetActivePG,MW,ii});  
 end
 
-function closeSPE(name)
-nh = get(0,'children');
-for ii = 1 : length(nh)
-    if strcmp ( get(nh(ii),'name' ), name )
-        close(nh(ii))
-    end
-end
-
 function MW = CreatePanelNomber1(MW, CounterPB)
     MW = newUicText(MW, CounterPB, 1, 1, 'Входные параметры');
     MW = newUicText(MW, CounterPB, 2, 1, 'Высота антенны, м');
     MW = newUicEdit(MW, CounterPB, 2, 2, '10', 'heightAntenna');
     MW = newUicText(MW, CounterPB, 3, 1, 'ДН антенны');
-    MW = newUicText(MW, CounterPB, 3, 2, 'sin(x)/x');    
+    MW = newUicPopup(MW, CounterPB, 3, 2, 'sin(x)/x','beamTypeAntenna');    
     MW = newUicText(MW, CounterPB, 4, 1, 'ширина ДН, градусов');
     MW = newUicEdit(MW, CounterPB, 4, 2, '5', 'beamWithAntenna');
     MW = newUicText(MW, CounterPB, 5, 1, 'наклон ДН, градусов');
     MW = newUicEdit(MW, CounterPB, 5, 2, '0', 'beamTitlAntenna');
+    
+    MW = newUicText(MW, CounterPB,  1, 3, 'Выбор задачи');
+    MW = newUicText(MW, CounterPB,  2, 3, 'Размерность' );
+    MW = newUicPopup(MW, CounterPB,  2, 4, {'2D','3D'} , 'dimProblem');
+    
+    MW = newUicText(MW, CounterPB,  1, 5, 'Выбор чего-то');
+    MW = newUicText(MW, CounterPB,  2, 5, 'параметр чего-то' );
+    MW = newUicEdit(MW, CounterPB,  2, 6, '0','test' );
  
 function MW = newUicText(MW, CounterPB, h, w, string)
     position = newUicPosition(MW, h, w);
@@ -121,20 +132,39 @@ function MW = newUicText(MW, CounterPB, h, w, string)
     
 function MW = newUicEdit(MW, CounterPB, h, w, string,name)
     MW.CounterUicEdit = MW.CounterUicEdit + 1;
-    position = newUicPosition(MW, h, w);
+    position = newUicPosition2(MW, h, w);
     MW.Edit{MW.CounterUicEdit}.handle = ...
         uicontrol( MW.PG{CounterPB}.handle,...
         'style','edit',...
         'String',string,...
         'Position',position);    
     MW.Edit{MW.CounterUicEdit}.name = name;
+    
+function MW = newUicPopup(MW, CounterPB, h, w, string,name)
+    MW.CounterUicEdit = MW.CounterUicEdit + 1;
+    position = newUicPosition2(MW, h, w);
+    MW.Edit{MW.CounterUicEdit}.handle = ...
+        uicontrol( MW.PG{CounterPB}.handle,...
+        'style','popupmenu',...
+        'String',string,...
+        'Position',position);    
+    MW.Edit{MW.CounterUicEdit}.name = name;
  
 function position = newUicPosition(MW, h, w)
-    position = [MW.panelPB.d + MW.sizePB.width*(w-1), ...
+    position = [MW.panelPB.d*2 + MW.sizePB.width*(w-1)-...
+        MW.sizePB.width*0.15*fix(w/2), ...
         MW.panelPB.height-round( h* ...
-        (MW.sizePB.height+MW.panelPB.d))-2*MW.panelPB.d, ...
+        (MW.sizePB.height+MW.panelPB.d))-3*MW.panelPB.d, ...
         MW.sizePB.width-MW.panelPB.d*2, ...
         MW.sizePB.height] ;
+    
+function position = newUicPosition2(MW, h, w)
+    position = [MW.panelPB.d*2 + MW.sizePB.width*(w-1)-...
+        MW.sizePB.width*0.15*fix((w-1)/2), ...
+        MW.panelPB.height-round( h* ...
+        (MW.sizePB.height+MW.panelPB.d))-3*MW.panelPB.d, ...
+        MW.sizePB.width*0.7-MW.panelPB.d*2, ...
+        MW.sizePB.height] ;    
  
 
 
@@ -144,7 +174,8 @@ function position = newUicPosition(MW, h, w)
 
 
 
-
+ function SaveTemp(MW)
+     size(MW);
 
 
 
