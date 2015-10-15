@@ -2,8 +2,10 @@ function SPE_window
 name = 'SPE v0.1.0016';
 %% <--- сюда отдельную функцию с параметрами окна:
 % размер, цвет и пр.
-MW = OpenMW(name);
-SaveTemp(MW);
+tic
+OpenMW(name);
+toc
+% SaveTemp(MW);
 
 function closeSPE(name)
 nh = get(0,'children');
@@ -13,7 +15,8 @@ for ii = 1 : length(nh)
     end
 end
 
-function MW = OpenMW(name)
+function OpenMW(name)
+global MW  % необходимо для корректного CallBack
 closeSPE(name)
 MW.handle = figure(...
     'Name', name,...
@@ -21,23 +24,24 @@ MW.handle = figure(...
     'Resize', 'off',...
     'NumberTitle', 'off',...
     'MenuBar', 'none');
-MW = SizeMW(MW);
-MW = PanelPB(MW);
+SizeMW;
+PanelPB;
 MW.CounterPB = 0;
 MW.CounterUicEdit = 0;
 %% <--- кнопки боковой панели
-namePB = 'Расчет';
-    MW = NewPB(MW,namePB);
-    MW = CreatePanelNomber1(MW,MW.CounterPB);
+namePB = 'Входные данные';
+    NewPB(namePB);
+    CreatePanelNomber1;
 namePB = 'Пост обработка';
-    MW = NewPB(MW,namePB);
+    NewPB(namePB);
 namePB = 'Рисунки';
-    MW = NewPB(MW,namePB);
+    NewPB(namePB);
 %%   
-SetActivePG(0,0,MW, 1)
-ButtonDownCallback(MW);    
+SetActivePG(0,0,1)
+ButtonDownCallback;    
 
-function MW = SizeMW(MW)
+function SizeMW
+global MW
 scrSize = get(0,'ScreenSize');
 xy = 0.1;
 wh = 0.8;
@@ -60,15 +64,19 @@ MW.sizePB.height = 20;
 MW.sizePB.width = 150;
 MW.panelPB.backgroundcolor = [4,5,6]/10;
 MW.panel.backgroundcolor    = [8,7.5,7]/10;
+MW.panel.h = 0;
+MW.panel.w = 0;
 
-function MW = PanelPB(MW)
+function PanelPB
+global MW
 MW.panelPB.position = [MW.panelPB.d, MW.panelPB.d, ...
     MW.panelPB.width, MW.win.height-2*MW.panelPB.d];
 MW.panelPB.handle = uipanel(MW.handle, 'Units', 'pixels', ...
     'Position',  MW.panelPB.position, 'BorderType', 'none', ...
 	'BackgroundColor', MW.panelPB.backgroundcolor);
 
-function MW = NewPB(MW, name) 
+function NewPB(name) 
+global MW
 MW.CounterPB = MW.CounterPB + 1;
 MW.PG{MW.CounterPB}.handle = uipanel(MW.handle, 'Title', name, ... 
                 'BackgroundColor', MW.panel.backgroundcolor );
@@ -85,9 +93,10 @@ set(MW.PB{MW.CounterPB}.handle, ...
        'String', ['<html><b>',name,'</html>']);
 %    'String', ['<html><b>',name,' &#9658;</html>']);
 MW.PB{MW.CounterPB}.num = MW.CounterPB;   
-SetActivePG(0,0,MW,MW.CounterPB); 
+SetActivePG(0,0,MW.CounterPB); 
 
-function SetActivePG(~,~,MW, num)
+function SetActivePG(~,~, num)
+global MW
     for ii = 1:MW.CounterPB
         if ii ~= num
             set(MW.PG{ii}.handle, 'Visible', 'Off');
@@ -99,68 +108,132 @@ function SetActivePG(~,~,MW, num)
     end
   	drawnow;
 
-function ButtonDownCallback(MW)    
+function ButtonDownCallback
+global MW
 for ii = 1:MW.CounterPB
-    set(MW.PB{ii}.handle,'Callback', {@SetActivePG,MW,ii});  
+    set(MW.PB{ii}.handle,'Callback', {@SetActivePG,ii});  
 end
 
-function MW = CreatePanelNomber1(MW, CounterPB)
-    MW = newUicText(MW, CounterPB, 1, 1, 'Входные параметры');
-    MW = newUicText(MW, CounterPB, 2, 1, 'Высота антенны, м');
-    MW = newUicEdit(MW, CounterPB, 2, 2, '10', 'heightAntenna');
-    MW = newUicText(MW, CounterPB, 3, 1, 'ДН антенны');
-    MW = newUicPopup(MW, CounterPB, 3, 2, 'sin(x)/x','beamTypeAntenna');    
-    MW = newUicText(MW, CounterPB, 4, 1, 'ширина ДН, градусов');
-    MW = newUicEdit(MW, CounterPB, 4, 2, '5', 'beamWithAntenna');
-    MW = newUicText(MW, CounterPB, 5, 1, 'наклон ДН, градусов');
-    MW = newUicEdit(MW, CounterPB, 5, 2, '0', 'beamTitlAntenna');
+function CreatePanelNomber1
+% мб п
+    newUicCol
+    newUicText( 'Параметры антенны');
+    newUicText( 'Высота антенны, м');
+    newUicEdit( '10', 'heightAntenna');
+    newUicRadio( 'антенна с заданной ДН','typeAntenna',1);
+    newUicText( 'вид ДН антенны');
+    newUicPopup(  {'<html>sin(x)/x','<html>sin(&theta)'},'beamTypeAntenna',1);    
+    newUicText(  'ширина ДН, градусов');
+    newUicEdit(  '5', 'beamWithAntenna');
+    newUicText( 'наклон ДН, градусов');
+    newUicEdit(  '0', 'beamTitlAntenna');
+    newUicRadio( 'АФАР','typeAntenna',0);
+    newUicText( 'количество элементов')
+    newUicText( 'по вертикали');
+    newUicEdit(  '100', 'Nx');
+    newUicText( 'по горизонтали');
+    newUicEdit( '100', 'Ny');
     
-    MW = newUicText(MW, CounterPB,  1, 3, 'Выбор задачи');
-    MW = newUicText(MW, CounterPB,  2, 3, 'Размерность' );
-    MW = newUicPopup(MW, CounterPB,  2, 4, {'2D','3D'} , 'dimProblem');
+    newUicRadio( 'Зеркальная антенна','typeAntenna',0);
+    newUicCol
+    newUicText( 'Выбор задачи');
+    newUicText( 'Размерность' );
+    newUicPopup( {'2D','3D'} , 'dimProblem',1);
+    newUicCol
+    newUicText( 'Выбор чего-то');
+    newUicText( 'параметр чего-то' );
+    newUicEdit( '0','test' );
     
-    MW = newUicText(MW, CounterPB,  1, 5, 'Выбор чего-то');
-    MW = newUicText(MW, CounterPB,  2, 5, 'параметр чего-то' );
-    MW = newUicEdit(MW, CounterPB,  2, 6, '0','test' );
+function newUicCol
+global MW
+    MW.panel.h = 0;
+    MW.panel.w = MW.panel.w + 1;
  
-function MW = newUicText(MW, CounterPB, h, w, string)
-    position = newUicPosition(MW, h, w);
-    uicontrol( MW.PG{CounterPB}.handle,...
+function newUicText( string )
+global MW
+    MW.panel.h = MW.panel.h + 1;
+    position = newUicPosition;
+    uicontrol( MW.PG{MW.CounterPB}.handle,...
         'style','text',...
         'String',string,...
         'Position',position);
     
-function MW = newUicEdit(MW, CounterPB, h, w, string,name)
+function newUicEdit( string, name)
+global MW
     MW.CounterUicEdit = MW.CounterUicEdit + 1;
-    position = newUicPosition2(MW, h, w);
+    position = newUicPosition2;
     MW.Edit{MW.CounterUicEdit}.handle = ...
-        uicontrol( MW.PG{CounterPB}.handle,...
+        uicontrol( MW.PG{MW.CounterPB}.handle,...
         'style','edit',...
         'String',string,...
         'Position',position);    
     MW.Edit{MW.CounterUicEdit}.name = name;
     
-function MW = newUicPopup(MW, CounterPB, h, w, string,name)
+function newUicPopup( string, name, value)
+global MW
     MW.CounterUicEdit = MW.CounterUicEdit + 1;
-    position = newUicPosition2(MW, h, w);
+    position = newUicPosition2;
     MW.Edit{MW.CounterUicEdit}.handle = ...
-        uicontrol( MW.PG{CounterPB}.handle,...
+        uicontrol( MW.PG{MW.CounterPB}.handle,...
         'style','popupmenu',...
         'String',string,...
-        'Position',position);    
+        'Position',position,...
+        'value', value);    
     MW.Edit{MW.CounterUicEdit}.name = name;
+    
+function newUicRadio( string,name,value)
+global MW
+    MW.panel.h = MW.panel.h + 1;
+    MW.CounterUicEdit = MW.CounterUicEdit + 1;
+    position = newUicPosition;
+    MW.Edit{MW.CounterUicEdit}.handle = ...
+        uicontrol( MW.PG{MW.CounterPB}.handle,...
+        'style','radiobutton',...
+        'String',string,...
+        'Position',position,...
+        'value', value,...
+        'backgroundcolor',[8 5 8]/10 ...
+        );
+    number = 1;
+    for ii = 1 : (MW.CounterUicEdit-1)
+        if isequal( MW.Edit{ii}.name, name)
+            number = MW.Edit{ii}.number;     
+        end
+    end
+    MW.Edit{MW.CounterUicEdit}.name = name;
+    MW.Edit{MW.CounterUicEdit}.number = number;
+    set(MW.Edit{MW.CounterUicEdit}.handle,...
+        'callback',{@CallRadiobutton,MW.CounterUicEdit})
+    
+function CallRadiobutton(a,b,count)
+global MW    
+    name = MW.Edit{count}.name;
+    for ii = 1 : MW.CounterUicEdit 
+        if isequal( MW.Edit{ii}.name, name)
+            set(MW.Edit{ii}.handle,...
+                'value',0);
+        end
+    end  
+    set(MW.Edit{count}.handle,...
+    'value',1);
  
-function position = newUicPosition(MW, h, w)
-    position = [MW.panelPB.d*2 + MW.sizePB.width*(w-1)-...
-        MW.sizePB.width*0.15*fix(w/2), ...
+function position = newUicPosition
+global MW
+w = MW.panel.w;
+h = MW.panel.h;
+    position = [MW.panelPB.d*2 + MW.sizePB.width*(2*w-2)- ...
+        MW.sizePB.width*0.15*(w-1), ...
         MW.panelPB.height-round( h* ...
         (MW.sizePB.height+MW.panelPB.d))-3*MW.panelPB.d, ...
         MW.sizePB.width-MW.panelPB.d*2, ...
         MW.sizePB.height] ;
     
-function position = newUicPosition2(MW, h, w)
-    position = [MW.panelPB.d*2 + MW.sizePB.width*(w-1)-...
-        MW.sizePB.width*0.15*fix((w-1)/2), ...
+function position = newUicPosition2
+global MW
+w = MW.panel.w;
+h = MW.panel.h;
+    position = [MW.panelPB.d*2 + MW.sizePB.width*(2*w-1)-...
+        MW.sizePB.width*0.15*(w-1), ...
         MW.panelPB.height-round( h* ...
         (MW.sizePB.height+MW.panelPB.d))-3*MW.panelPB.d, ...
         MW.sizePB.width*0.7-MW.panelPB.d*2, ...
@@ -174,8 +247,8 @@ function position = newUicPosition2(MW, h, w)
 
 
 
- function SaveTemp(MW)
-     size(MW);
+%  function SaveTemp(MW)
+%      size(MW);
 
 
 
