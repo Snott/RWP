@@ -2,9 +2,9 @@ function SPE_window
 name = 'SPE v0.1.0018';
 %% <--- сюда отдельную функцию с параметрами окна:
 % размер, цвет и пр.
-tic
+% tic
 OpenMW(name);
-toc
+% toc
 % SaveTemp(MW);
 
 function closeSPE(name)
@@ -39,13 +39,13 @@ namePB = 'Пост обработка';
     NewPB(namePB);
 namePB = 'Рисунки';
     NewPB(namePB);
-    
+%% кнопки нижней панели
 newUicPBs;    
 %%   
 SetActivePG(0,0,1)
 ButtonDownCallback;    
 
-function SizeMW
+function SizeMW % размер и цвет элементов
 global MW
 scrSize = get(0,'ScreenSize');
 xy = 0.1;
@@ -76,9 +76,6 @@ MW.panel.radiobackgroundcolor = [8 5 8]/10;
 MW.panel.checkbackgroundcolor = [5 5 8]/10;
 MW.panel.pushbackgroundcolor = [5 8 8]/10;
 
-% MW.panel.h = 0;
-% MW.panel.w = 0;
-
 function PanelPB
 global MW
 MW.panelPB.position = [MW.panelPB.d, MW.panelPB.d, ...
@@ -87,22 +84,12 @@ MW.panelPB.handle = uipanel(MW.handle, 'Units', 'pixels', ...
     'Position',  MW.panelPB.position, 'BorderType', 'none', ...
 	'BackgroundColor', MW.panelPB.backgroundcolor);
 % RTF
-if 1
 positionRis =  [175/2-140/2+1, MW.panelPB.d + MW.sizePB.height*2.1, ...
     139,  140];
 pbRTF =  uicontrol(MW.panelPB.handle,'style','pushbutton'...
-        ,'position', positionRis);% [28, 28+30, 119, 140]); % ,'position' , [35, 35, 100, 100]);
-%         ris = 'rtf2';
-if 0
-        ris = 'radiotechnical_logo_2';
-        [cdata, map] = imread([ris,'.png']);
-        if ~isempty( map ) 
-            cdata = ind2rgb( cdata, map ); 
-        end
-end
+        ,'position', positionRis);
         load('cdata.mat')
         set(pbRTF ,'CData', cdata);
-end
 % информацию об ошибках программы направлять по адресу:
 positionBugs = [MW.panelPB.d, MW.panelPB.d, ...
     MW.panelPB.width - 2*MW.panelPB.d,  MW.sizePB.height*2.1];
@@ -241,6 +228,10 @@ position = newUicPositionPB;
         'backgroundcolor',MW.panel.pushbackgroundcolor, ...
         'Position', position);    
     MW.Edit{MW.CounterUicEdit}.name = name;
+    %callback или каждый свой, через eval
+    %            или общий и разделение по name или counter
+    set(MW.PB2{MW.CounterUicPB}.handle,'callback',...
+        {@Callback_pb2,MW.CounterUicPB})
 
 function newUic
 global MW
@@ -393,8 +384,8 @@ w = MW.panel.w;
         MW.sizePB.width*MW.sizePB.widthK-MW.panelPB.d*1, ...
         MW.sizePB.height] ;      
  
-
-
+function  Callback_pb2(a,b,CounterUicPB)
+disp(num2str(CounterUicPB))
 
 
 
