@@ -75,6 +75,8 @@ MW.panel.backgroundcolor    = [8,7.5,7]/10;
 MW.panel.radiobackgroundcolor = [8 5 8]/10;
 MW.panel.checkbackgroundcolor = [5 5 8]/10;
 MW.panel.pushbackgroundcolor = [5 8 8]/10;
+MW.panel.radio1backgroundcolor = [8 9 8]/10;
+MW.panel.radio0backgroundcolor = [94 94 94]/100;
 
 function PanelPB
 global MW
@@ -132,9 +134,12 @@ global MW
         if ii ~= num
             set(MW.PG{ii}.handle, 'Visible', 'Off');
             set(MW.PB{ii}.handle, 'Value', 0);
+%             set(MW.PB{ii}.handle, 'Value', 0);
+            MW.PB{ii}.handle.BackgroundColor =MW.panel.radio0backgroundcolor;
         else
           	set(MW.PG{ii}.handle, 'Visible', 'On');
             set(MW.PB{ii}.handle, 'Value', 1);
+            MW.PB{ii}.handle.BackgroundColor = MW.panel.radio1backgroundcolor;
         end     
     end
   	drawnow;
