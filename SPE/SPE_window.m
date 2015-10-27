@@ -73,9 +73,9 @@ MW.panelPosition = ...
     4*MW.panelPB.d + MW.sizePB.height, ...
     MW.win.width-MW.panelPB.width-3*MW.panelPB.d,...
     MW.panel.height];
-MW.sizePB.width = 170;
-MW.sizePB.widthK = 0.5;
-MW.sizePB.widthD = 0.35; %( <=(1-K) )
+MW.sizePB.width = 165;
+MW.sizePB.widthK = 0.6;
+MW.sizePB.widthD = 0.3; %( <=(1-K) )
 MW.panelPB.backgroundcolor = [4 5 6]/10;
 MW.panel.textbackgroundcolor = [8 7 6]/10;
 MW.panel.backgroundcolor    = [7 6 5]/10;
