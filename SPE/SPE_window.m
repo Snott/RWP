@@ -1,5 +1,5 @@
 function SPE_window
-name = 'SPE v0.1.0021';
+name = 'SPE v0.1.0022';
 %% <--- сюда отдельную функцию с параметрами окна:
 % размер, цвет и пр.
 % tic
@@ -170,8 +170,11 @@ function CreatePanelNomber1
         addCallBack('{@lamda2frec MW.CounterUicEdit-1}');
     newUicText( 'высота центра антенны, м');
     newUicEdit( '10', 'heightAntenna');
+    
     newUicRadio( 'Плоская волна','typeAntenna',0);
+        notEnable;
     newUicRadio( 'Дельта-функция','typeAntenna',0);
+        notEnable;
     newUicRadio( 'Антенна с заданной ДН','typeAntenna',1);
     newUicText( 'вид ДН антенны');
     newUicPopup( {'<html>sin(x)/x','<html>sin(&theta)'},...
@@ -198,16 +201,20 @@ function CreatePanelNomber1
     newUicEdit(  '0', 'beamTitlAZAntenna');
     
     newUicRadio( 'Зеркальная антенна','typeAntenna',0);
+        notEnable;
     newUicText( 'площадь, м^2');
     newUicEdit( '10', 'Sa');
+        notEnable;
 %         newUicText( 'КИП');
 %     newUicEdit( '1', 'KIP');
     
     newUicMainText( 'Направление главного луча')
     newUicText( 'угол места, градусов');
     newUicEdit(  '2', 'beamTitlUMAntenna');
+        notEnable;
     newUicText( 'азимут, градусов');
     newUicEdit(  '0', 'beamTitlAZAntenna');
+        notEnable;
     
     
     newUicCol
@@ -236,8 +243,10 @@ function CreatePanelNomber1
     newUicCheck( 'метод геометрической оптики','methodGO',0);
     newUicCheck( 'метод параболического уравнения','methodPE',1);
     newUicCheck( 'метод поверхностных интегральных уравнений','methodSIE',0);
+        notEnable;
     newUicText( 'параметр чего-то' );
     newUicEdit( '0','test' );
+        notEnable;
     
     
 % Добавить кнопки применить, отменить, по умолчанию, сохранить, загрузить 
@@ -383,6 +392,11 @@ global MW
     set(MW.Edit{MW.CounterUicEdit}.handle,...
         'callback',{@CallRadiobutton,MW.CounterUicEdit})
     
+    function notEnable
+        global MW
+        MW.Edit{MW.CounterUicEdit}.handle.Enable = 'off';
+        
+    
 function newUicCheck( string,name,value)
 global MW
     MW.panel.h = MW.panel.h + 1;
@@ -404,7 +418,19 @@ global MW
     else
         MW.Edit{MW.CounterUicEdit}.handle.BackgroundColor ...
             = MW.panel.radio0backgroundcolor;
-    end
+     end
+MW.Edit{MW.CounterUicEdit}.handle.Callback = {@CallCheckbox MW.CounterUicEdit};
+
+function CallCheckbox(a,b,num)
+        global MW
+    if a.Value
+        MW.Edit{num}.handle.BackgroundColor ...
+            = MW.panel.radio1backgroundcolor;
+    else
+        MW.Edit{num}.handle.BackgroundColor ...
+            = MW.panel.radio0backgroundcolor;
+   end
+    
     
 function CallRadiobutton(a,b,count)
 global MW    
