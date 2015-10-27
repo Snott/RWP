@@ -1,5 +1,6 @@
 function SPE_window
-name = 'SPE v0.1.0022';
+%% оконный интерфейс прграммы SPE
+name = 'SPE v0.1.0023';
 %% <--- сюда отдельную функцию с параметрами окна:
 % размер, цвет и пр.
 % tic
@@ -83,7 +84,7 @@ MW.panel.radiobackgroundcolor = [8 5 8]/10;
 MW.panel.checkbackgroundcolor = [8 9 8]/10;
 MW.panel.pushbackgroundcolor = [6 8 8]/10;
 MW.panel.radio1backgroundcolor = [8 9 8]/10;
-MW.panel.radio0backgroundcolor = [8 8 8]/10;
+MW.panel.radio0backgroundcolor = [7.5 8 8.5]/10;
 MW.panel.backgroundcolornotenable = [3 3 3]/10;
 
 function PanelPB
@@ -210,10 +211,10 @@ function CreatePanelNomber1
     
     newUicMainText( 'Направление главного луча')
     newUicText( 'угол места, градусов');
-    newUicEdit(  '2', 'beamTitlUMAntenna');
+    newUicEdit(  '2', 'beamTitlUMAntennaZ');
         notEnable;
     newUicText( 'азимут, градусов');
-    newUicEdit(  '0', 'beamTitlAZAntenna');
+    newUicEdit(  '0', 'beamTitlAZAntennaZ');
         notEnable;
     
     
@@ -253,14 +254,25 @@ function CreatePanelNomber1
 function newUicPBs
 newUic
     newUicPB('Применить', 'apply')
+        notEnablePB
     newUicPB('Отменить', 'cancel')
+        notEnablePB
     newUicPB('По умолчанию', 'byDef')
+        notEnablePB
     newUicPB('Сохранить', 'save')
+        notEnablePB
     newUicPB('Загрузить', 'load')
+        notEnablePB
 newUicHalfCol
     newUicPB('Расчитать', 'calc')
     newUicPB('Пауза', 'pause')
+        notEnablePB
     newUicPB('Стоп', 'stop')
+        notEnablePB
+    
+function notEnablePB
+        global MW
+        MW.PB2{MW.CounterUicPB}.handle.Enable = 'off';    
 
     
 function newUicPB(string, name)    
@@ -336,6 +348,7 @@ function addCallBack(func)
 global MW
      MW.Edit{MW.CounterUicEdit}.handle.Callback = eval(func);
      
+%      frec2lamda и lamda2frec оказались идентичны!)
 function frec2lamda(a,b,num)
 %         disp('123')
 global MW SPEEDofLIGHT
@@ -384,7 +397,8 @@ global MW
     number = 1;
     for ii = 1 : (MW.CounterUicEdit-1)
         if isequal( MW.Edit{ii}.name, name)
-            number = MW.Edit{ii}.number;     
+%             number = MW.Edit{ii}.number;  
+            number = number + 1;
         end
     end
     MW.Edit{MW.CounterUicEdit}.name = name;
@@ -395,6 +409,8 @@ global MW
     function notEnable
         global MW
         MW.Edit{MW.CounterUicEdit}.handle.Enable = 'off';
+%         MW.Edit{MW.CounterUicEdit}.handle.BackgroundColor = ...
+%             MW.panel.backgroundcolornotenable; 
         
     
 function newUicCheck( string,name,value)
@@ -490,8 +506,36 @@ w = MW.panel.w;
         MW.sizePB.width*MW.sizePB.widthK-MW.panelPB.d*1, ...
         MW.sizePB.height] ;      
  
+    
+    
+    
 function  Callback_pb2(a,b,CounterUicPB)
-disp(num2str(CounterUicPB))
+% disp(num2str(CounterUicPB))%
+% считать всю информацию из окна
+% что мы знаем?:
+ global MW
+ % "пока"  вся инфа в Edit. как будет в другой панели???
+ for ii = 1 : length(MW.Edit)
+%     disp(MW.Edit{ii}.name)
+    if isequal(MW.Edit{ii}.handle.Style,'edit') 
+        eval(['Var.',MW.Edit{ii}.name,' = ',MW.Edit{ii}.handle.String,';'])
+    end
+    if isequal(MW.Edit{ii}.handle.Style,'popupmenu')
+        eval(['Var.',MW.Edit{ii}.name,' = ',' '' ',MW.Edit{ii}.handle.String{MW.Edit{ii}.handle.Value},' '' ',';'])
+    end
+    if isequal(MW.Edit{ii}.handle.Style,'checkbox')
+        eval(['Var.',MW.Edit{ii}.name,' = ',num2str(MW.Edit{ii}.handle.Value),';'])
+    end
+     if isequal(MW.Edit{ii}.handle.Style,'radiobutton')
+         if MW.Edit{ii}.handle.Value
+             eval(['Var.',MW.Edit{ii}.name,' = ',num2str(MW.Edit{ii}.number),';'])
+         end
+     end
+%     MW.Edit{ii}.handle.Value
+ end   
+ Var
+%  SPE(var)
+ 
 
 
 
