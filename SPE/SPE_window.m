@@ -264,7 +264,7 @@ newUic
     newUicPB('Загрузить', 'load')
         notEnablePB
 newUicHalfCol
-    newUicPB('Расчитать', 'calc')
+    newUicPB('Рассчитать', 'calc')
     newUicPB('Пауза', 'pause')
         notEnablePB
     newUicPB('Стоп', 'stop')
