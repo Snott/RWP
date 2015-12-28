@@ -1,3 +1,5 @@
+%% внести исправления:
+% вспомогательную фигуру на задний план.
 function SPE_window
 %% оконный интерфейс прграммы SPE
 name = 'SPE v0.1.0028';
@@ -183,7 +185,7 @@ function CreatePanelNomber1
     newUicEdit( '3.0e-2','lambda');
         addCallBack('{@frec2lamda MW.CounterUicEdit-1}');
     newUicText( 'высота центра антенны, м');
-    newUicEdit( '10', 'heightAntenna');
+    newUicEdit( '1', 'heightAntenna');
     
 %     newUicMainText( 'Выбор задачи');
     newUicText( 'Размерность задачи' );
@@ -192,27 +194,27 @@ function CreatePanelNomber1
         newUicText( 'начальная дальность, м' );
     newUicEdit( '20','firstRangeProblem' );
         newUicText( 'конечная дальность, м' );
-    newUicEdit( '200000','endRangeProblem' );
+    newUicEdit( '2000','endRangeProblem' );
         newUicText( 'шаг по дальности, м' );
-    newUicEdit( '1','stepRangeProblem'  );
+    newUicEdit( '1e-0','stepRangeProblem'  );
         newUicText( 'шаг вывода по дальности, м' );
     newUicEdit( '10','stepOutRangeProblem'  );
     newUicMainText( 'Высота');
         newUicText( '~ высота, м' );
-    newUicEdit( '50','heightProblem' );
+    newUicEdit( '5','heightProblem' );
     addCallBack('{@height2log MW.CounterUicEdit+1, MW.CounterUicEdit+2}');
         newUicText( 'шаг по высоте, м' );
-    newUicEdit( '0.1','stepHeightProblem'  );
+    newUicEdit( '1e-2','stepHeightProblem'  );
      addCallBack('{@step2log MW.CounterUicEdit-1, MW.CounterUicEdit+1}');
         newUicText( 'кол-во элементов, log_2' );
     newUicEdit( '9','log2HeightProblem'  );
     addCallBack('{@log2height MW.CounterUicEdit-1, MW.CounterUicEdit-2}');
     newUicMainText( 'Ширина');
         newUicText( '~ ширина, м' );
-    newUicEdit( '100','widthProblem' );
+    newUicEdit( '10','widthProblem' );
     addCallBack('{@height2log MW.CounterUicEdit+1, MW.CounterUicEdit+2}');
     newUicText( 'шаг по ширине, м' );
-    newUicEdit( '0.1','stepWidthProblem'  );
+    newUicEdit( '1e-2','stepWidthProblem'  );
      addCallBack('{@step2log MW.CounterUicEdit-1, MW.CounterUicEdit+1}');
         newUicText( 'кол-во элементов, log_2' );
     newUicEdit( '10','log2WidthProblem'  );
@@ -238,11 +240,11 @@ function CreatePanelNomber1
         'beamTypeAntenna',1); 
     addCallBack('@NotSet')
     newUicText(  'вертик. ширина ДН, град.');
-    newUicEdit(  '5', 'beamWithAntennaX');
+    newUicEdit(  '1', 'beamWithAntennaX');
     newUicText( 'вертик. наклон ДН, град.');
     newUicEdit(  '0', 'beamTitlAntennaX');
     newUicText(  'гориз. ширина ДН, град.');
-    newUicEdit(  '5', 'beamWithAntennaY');
+    newUicEdit(  '1', 'beamWithAntennaY');
     newUicText( 'гориз. наклон ДН, град.');
     newUicEdit(  '0', 'beamTitlAntennaY');
     newUicCheck( 'только главный луч','onlyMainBeam',1);
@@ -319,10 +321,24 @@ function CreatePanelNomber2
    newUicRadio( 'гладкая поверхность','typeSerf',1);
    newUicRadio( 'одиночная неровность','typeSerf',0);
    
-   newUicCol
+   newUicMainText('Шероховатость')
+   
    newUicCheck('мелкомасштабная неровность','isNoiseSerfase',1)
    newUicText( 'размер шероховатости, м');
     newUicEdit(  '0.02', 'sizeNoiseSerfase');
+    
+    newUicCol
+    %newEmpty
+    newUicMainText('Тропосфера')
+    newUicMainText('Метеопараметры')
+    newUicMainText('Волновод')
+    
+    newUicCol
+    newUicMainText('граничные условия')
+    newUicText('толщина слоя, %')
+    newUicEdit('20', 'layerHeight')
+    newUicText('коэф. поглощения')
+    newUicEdit('5e-5','layerAlfa')
     
    
       
@@ -691,6 +707,20 @@ function  Callback_pb2(a,b,CounterUicPB)
  Var.Ax(1) = MW.Ax(2);
  Var.Ax(2) = MW.Ax(3);
  Var.Ax(3) = MW.Ax(4);
+ % очистить все графики
+    cla( MW.Ax(2) );
+    cla( MW.Ax(3) );
+    cla( MW.Ax(4) );
+ if isequal(Var.dimProblem,2)
+     MW.Ax(3).Position = [0.1 0.1 0.8 0.8];
+     MW.Ax(2).Visible = 'off';
+ elseif isequal(Var.dimProblem,1)
+     MW.Ax(2).Position = [0.1 0.1 0.8 0.8];
+     MW.Ax(3).Visible = 'off';
+     MW.Ax(1).Visible = 'off';
+     MW.Ax(4).Visible = 'off';
+ end
+ 
  Var.SPEEDofLIGHT = SPEEDofLIGHT;
 %  SPE(var)
 SetActivePG(0, 0, 3)
