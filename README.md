@@ -1,3 +1,3 @@
 # RWP
 RadioWawe Propagation. 
-Гибкий оконный интерфейс.
+Geometrical optics.
