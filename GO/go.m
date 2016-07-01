@@ -35,13 +35,13 @@ function go
     % 1 - x=const
     % 2 - y=const
     % 3 - z=const
-  if 1     
+       
     % плоскость сечения
     plane_x0 = 2; % 2 метра над землей
     plane_y0 = 0; 
     plane_z0 = 10;
-
-    plane_d = .1; % шаг дискрета поверхности 
+    
+    plane_d = 1; % шаг дискрета поверхности 
     % границы расчета в плоскости сечения
     plane_x_min = 0;
     plane_x_max = 50;
@@ -52,7 +52,7 @@ function go
     plane_z_max = plane_z_min + 50; % конечная дальность
     plane_z_d = plane_d; % шаг по дальности
     plane_z = plane_z_min : plane_z_d : plane_z_max; % массив дальностей
-
+     
     % ширина (поперечные координаты):
     plane_y_min = -50; 
     plane_y_max = 50;
@@ -91,8 +91,10 @@ function go
       dipole_m = 8; % количество вертикальных линеек
       dipole_d = lambda/2; % шаг м-у излучателями по вертикали и горизонтали
       % В локальной системе координат
-      dipole_x_local = ( (1:dipole_n) - (dipole_n+1)/2 ) * dipole_d; % вектор высот излучателей
-      dipole_y_local = ( (1:dipole_m) - (dipole_m+1)/2 ) * dipole_d; % вектор координат по ширине
+      dipole_dn = dipole_d;
+      dipole_dm = dipole_d;
+      dipole_x_local = ( (1:dipole_n) - (dipole_n+1)/2 ) * dipole_dn; % вектор высот излучателей
+      dipole_y_local = ( (1:dipole_m) - (dipole_m+1)/2 ) * dipole_dm; % вектор координат по ширине
       dipole_z_local = zeros( size(dipole_x_local) ); % по дальности
       
       dipole_gamma = 25; % угол наклона полотна
@@ -109,7 +111,10 @@ function go
           dipole_y*cosd(dipole_alpha) * sind(dipole_beta) + ...
           dipole_z*cosd(dipole_alpha) * cosd(dipole_beta) ) ;
       dipole_PG = 200; % произведение мощности излучения на коэффициент усиления
-      
+        PPM_0 = 25;%25; % [мкВт/см^2] граница СЗЗ, 0 дБ
+      PPM_min = -41; % граница минимального значения для отображения на графики, 
+      PPM_max = 0; % граница по максимальному значению
+  if 1   
       %решение
       E = 0;
       for i_dipole = 1 : dipole_n*dipole_m 
@@ -160,9 +165,7 @@ function go
         end
       end
       
-      PPM_0 = 25;%25; % [мкВт/см^2] граница СЗЗ, 0 дБ
-      PPM_min = -41; % граница минимального значения для отображения на графики, 
-      PPM_max = 0; % граница по максимальному значению
+       
       PPM = 10*log10( dipole_PG/4/pi ) + 20*log10( abs(E+(E==0)*eps) ) - ...
         10*log10( PPM_0 ); % плотность потока мощности (ППМ)
       %PPM = PPM.*(PPM >= PPM_min) + PPM_min.*(PPM < PPM_min) ; % ограничения:
@@ -223,7 +226,7 @@ function go
         end
       title_fig  = [temp_title ,' ', temp_text];
       title_fig3 = [temp_title3,' ', temp_text];
-
+      
       % отрисовка рисунков
       if is_draw_E
         if is_draw_contour
@@ -278,117 +281,262 @@ function go
         end
       end
     end
-    toc
+    toc; tic;
   end
     
   
   % окно навигации по рисункам
-  h_fig1 = figure(1);
-  set(h_fig1,'menubar','none');
-  set(h_fig1,'name','navigation');
-  h_fig1_position = get(h_fig1,'position');
-  h_screen_position = get(0,'screensize');
-  h_h = 35; % высота подписи 
-  h_fig1_position_new = [ h_fig1_position(1),...
-    h_fig1_position(2)+h_fig1_position(4)+1*h_h,...
-    h_fig1_position(3),...
-    h_screen_position(4)-h_fig1_position(2)-h_fig1_position(4)-2*h_h];
-  set(h_fig1,'position',h_fig1_position_new);
-
-  height_button = 30;
-  weigth_button = 80;
-  step_button = 5;
-  h_button_position0 = [0, h_fig1_position_new(4)-height_button,weigth_button,height_button];
-  h_button_position = h_button_position0 ;
-  h_fig1_rb1 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','draw_E', 'value', 0, 'tag','tag_rb_draw_E');
-    
-  h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
-  h_fig1_rb2 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','draw_PPM', 'value', 0, 'tag','tag_rb_draw_PPM');
-
-  h_button_position = h_button_position0 - [0, step_button + height_button ,0 ,0];;
-  h_fig1_rb3 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','X = const', 'value', 0, 'tag','tag_rb_draw_X');
-  h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
-  h_fig1_rb4 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','Y = const', 'value', 0, 'tag','tag_rb_draw_Y');
-  h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
-  h_fig1_rb5 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','Z = const', 'value', 0, 'tag','tag_rb_draw_Z');  
-    
-  h_button_position = h_button_position0 - [0, 2*(step_button + height_button) ,0 ,0];;
-  h_fig1_rb6 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','contour', 'value', 0, 'tag','tag_rb_draw_contour');
-  h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
-  h_fig1_rb7 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
-    'string','surface', 'value', 0, 'tag','tag_rb_draw_surf');
-
-  set(guihandles.tag_rb_draw_E,'value',1)
-  set(guihandles.tag_rb_draw_PPM,'value',0)
-  if ~is_draw_E
-    set(guihandles.tag_rb_draw_E,'value',0,'enable','off')
-    set(guihandles.tag_rb_draw_PPM,'value',1)
-  end
-  if ~is_draw_PPM
-    set(guihandles.tag_rb_draw_PPM,'value',0,'enable','off')
+    h_fig1 = figure(1);
+    set(h_fig1,'menubar','none');
+    set(h_fig1,'name','navigation');
+    h_fig1_position = get(h_fig1,'position');
+    h_screen_position = get(0,'screensize');
+    h_h = 30; % высота подписи 
+    h_fig1_position_new = [ h_fig1_position(1),...
+      h_fig1_position(2)+h_fig1_position(4)+1*h_h,...
+      h_fig1_position(3),...
+      h_screen_position(4)-h_fig1_position(2)-h_fig1_position(4)-2*h_h];
+    set(h_fig1,'position',h_fig1_position_new);
+      
+    height_button = 35;
+    weigth_button = 85;
+    step_button = 5;
+    h_button_position0 = [0, h_fig1_position_new(4)-height_button,weigth_button,height_button];
+    h_button_position = h_button_position0 ;
+    h_fig1_rb1 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','draw_E', 'value', 0, 'tag','tag_rb_draw_E');
+      
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig1_rb2 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','draw_PPM', 'value', 0, 'tag','tag_rb_draw_PPM');
+      
+    h_button_position = h_button_position0 - [0, step_button + height_button ,0 ,0];;
+    h_fig1_rb3 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','X = const', 'value', 0, 'tag','tag_rb_draw_X');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig1_rb4 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','Y = const', 'value', 0, 'tag','tag_rb_draw_Y');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig1_rb5 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','Z = const', 'value', 0, 'tag','tag_rb_draw_Z');  
+      
+    h_button_position = h_button_position0 - [0, 2*(step_button + height_button) ,0 ,0];;
+    h_fig1_rb6 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','contour', 'value', 0, 'tag','tag_rb_draw_contour');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig1_rb7 = uicontrol(h_fig1,'style','radiobutton','position',h_button_position,...
+      'string','surface', 'value', 0, 'tag','tag_rb_draw_surf');
+      
     set(guihandles.tag_rb_draw_E,'value',1)
-  end
-  %if is_draw_E && is_draw_PPW
-  %  set(guihandles.tag_rb_draw_E,'value',1)
-  %  set(guihandles.tag_rb_draw_PPM,'value',0)
-  %end
-  
-  set(guihandles.tag_rb_draw_X,'value',1);
-  set(guihandles.tag_rb_draw_Y,'value',0);
-  set(guihandles.tag_rb_draw_Z,'value',0);
-
-  if ~sum(select_plane_calc == 1)% X
-    set(guihandles.tag_rb_draw_X,'value',0,'enable','off');
-    set(guihandles.tag_rb_draw_Y,'value',1);
-  end
-  if ~sum(select_plane_calc == 2)% Y
-    set(guihandles.tag_rb_draw_Y,'value',0,'enable','off');
-    set(guihandles.tag_rb_draw_Z,'value',1);
-  end
-  if ~sum(select_plane_calc == 3)% Z
-    set(guihandles.tag_rb_draw_Z,'value',0,'enable','off');
+    set(guihandles.tag_rb_draw_PPM,'value',0)
+    if ~is_draw_E
+      set(guihandles.tag_rb_draw_E,'value',0,'enable','off')
+      set(guihandles.tag_rb_draw_PPM,'value',1)
+    end
+    if ~is_draw_PPM
+      set(guihandles.tag_rb_draw_PPM,'value',0,'enable','off')
+      set(guihandles.tag_rb_draw_E,'value',1)
+    end
+    %if is_draw_E && is_draw_PPW
+    %  set(guihandles.tag_rb_draw_E,'value',1)
+    %  set(guihandles.tag_rb_draw_PPM,'value',0)
+    %end
+    
     set(guihandles.tag_rb_draw_X,'value',1);
-  end
-  
-  set(guihandles.tag_rb_draw_contour,'value',1)
-  set(guihandles.tag_rb_draw_surf,'value',0)
-  if ~is_draw_contour
-    set(guihandles.tag_rb_draw_contour,'value',0,'enable','off')
-    set(guihandles.tag_rb_draw_surf,'value',1)
-  end
-  if ~is_draw_surf
-    set(guihandles.tag_rb_draw_surf,'value',0,'enable','off')
+    set(guihandles.tag_rb_draw_Y,'value',0);
+    set(guihandles.tag_rb_draw_Z,'value',0);
+      
+    if ~sum(select_plane_calc == 1)% X
+      set(guihandles.tag_rb_draw_X,'value',0,'enable','off');
+      set(guihandles.tag_rb_draw_Y,'value',1);
+    end
+    if ~sum(select_plane_calc == 2)% Y
+      set(guihandles.tag_rb_draw_Y,'value',0,'enable','off');
+      set(guihandles.tag_rb_draw_Z,'value',1);
+    end
+    if ~sum(select_plane_calc == 3)% Z
+      set(guihandles.tag_rb_draw_Z,'value',0,'enable','off');
+      set(guihandles.tag_rb_draw_X,'value',1);
+    end
+    
     set(guihandles.tag_rb_draw_contour,'value',1)
-  end
+    set(guihandles.tag_rb_draw_surf,'value',0)
+    if ~is_draw_contour
+      set(guihandles.tag_rb_draw_contour,'value',0,'enable','off')
+      set(guihandles.tag_rb_draw_surf,'value',1)
+    end
+    if ~is_draw_surf
+      set(guihandles.tag_rb_draw_surf,'value',0,'enable','off')
+      set(guihandles.tag_rb_draw_contour,'value',1)
+    end
+      
+    % callbacks  
+    set(guihandles.tag_rb_draw_E,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_PPM,[]});
+    set(guihandles.tag_rb_draw_PPM,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_E,[]});
     
-  % callbacks  
-  set(guihandles.tag_rb_draw_E,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_PPM,[]});
-  set(guihandles.tag_rb_draw_PPM,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_E,[]});
+    set(guihandles.tag_rb_draw_X,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_Y,guihandles.tag_rb_draw_Z})
+    set(guihandles.tag_rb_draw_Y,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_X,guihandles.tag_rb_draw_Z})
+    set(guihandles.tag_rb_draw_Z,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_Y,guihandles.tag_rb_draw_X})
+      
+    set(guihandles.tag_rb_draw_contour,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_surf,[]});
+    set(guihandles.tag_rb_draw_surf,'callback',{@func_push_rb,guihandles,...
+      guihandles.tag_rb_draw_contour,[]});
+      
+%    h_button_position0 = [0, h_fig1_position_new(4)-height_button,weigth_button,height_button];
+    h_button_position = h_button_position0 + 3*[weigth_button+step_button,0 ,0 ,0]; ;
+    uicontrol(h_fig1,'style','text','position',h_button_position,...
+      'string','PPM_0', 'tag','tag_text_PPM_0');
+      
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    uicontrol(h_fig1,'style','edit','position',h_button_position,...
+      'string',num2str(PPM_0), 'tag','tag_edit_PPM_0');
+      
+    h_button_position = h_button_position0 + [3*(weigth_button+step_button),-1*(step_button + height_button) ,0 ,0]; ;
+    uicontrol(h_fig1,'style','text','position',h_button_position,...
+      'string','PPM_min', 'tag','tag_text_PPM_min');
+      
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    uicontrol(h_fig1,'style','edit','position',h_button_position,...
+      'string',num2str(PPM_min), 'tag','tag_edit_PPM_min');  
+      
+    h_button_position = h_button_position0 + [3*(weigth_button+step_button),-2*(step_button + height_button) ,0 ,0]; ;
+    uicontrol(h_fig1,'style','text','position',h_button_position,...
+      'string','PPM_max', 'tag','tag_text_PPM_max');
+      
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    uicontrol(h_fig1,'style','edit','position',h_button_position,...
+      'string',num2str(PPM_max), 'tag','tag_edit_PPM_max');    
+      
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    uicontrol(h_fig1,'style','pushbutton','position',h_button_position,...
+      'string','save as', 'tag','tag_pb_save_as');    
+      
+  % окно входных данных
+    h_fig2 = figure(2,'menubar','none');
+    set(h_fig2,'name','input data');
+    h_fig2_position_new = [ 10,...
+      h_fig1_position(2),...
+      h_fig1_position(1)-20,...
+      h_fig1_position(4)];
+    set(h_fig2,'position',h_fig2_position_new);
+    
+    %  height_button = 30;
+    %  weigth_button = 80;
+    %  step_button = 5;
+    h_button_position0 = [0, h_fig2_position_new(4)-height_button,weigth_button,height_button];
+    num_str = 0;
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    uicontrol(h_fig2,'style','text','position',h_button_position,...
+      'string',{'frequency, Hz','lambda, m'}, 'value', 0, 'tag','tag_text_frequency');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed1 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(frequency), 'value', 0, 'tag','tag_edit_frequency');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];  
+    h_fig2_ed1a = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(lambda), 'tag','tag_edit_lambda');
+    
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    uicontrol(h_fig2,'style','text','position',h_button_position,...
+      'string',{'array antenna', 'height, m'}, 'tag','tag_text_frequency');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed2 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_h ), 'tag','tag_edit_frequency');
+      
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    uicontrol(h_fig2,'style','text','position',h_button_position,...
+      'string',{'num of dipoles', 'vertic & horiz'}, 'tag','tag_text_frequency');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed3 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_n ), 'tag','tag_edit_dipole_dn');  
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];  
+    h_fig2_ed4 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_m ), 'tag','tag_edit_dipole_dm');  
+      
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    uicontrol(h_fig2,'style','text','position',h_button_position,...
+      'string',{'step between', 'vertic & horiz'}, 'tag','tag_text_frequency');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed3 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_dn), 'tag','tag_edit_dipole_n');  
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];  
+    h_fig2_ed4 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_dm), 'tag','tag_edit_dipole_m');    
+    
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    uicontrol(h_fig2,'style','text','position',h_button_position,...
+      'string',{'titl angle', 'array, degrees'}, 'tag','tag_text_dipole_gamma');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed5 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_gamma), 'tag','tag_edit_dipole_gamma');
+      
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    uicontrol(h_fig2,'style','text','position',h_button_position,...
+      'string',{'angle elevat,','azimuth, degr'}, 'tag','tag_text_dipole_gamma');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed5 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_alpha), 'tag','tag_edit_dipole_gamma');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_ed5 = uicontrol(h_fig2,'style','edit','position',h_button_position,...
+      'string',num2str(dipole_beta), 'tag','tag_edit_dipole_gamma'); 
+    
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0] ;
+    h_fig2_cb1 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','draw_E', 'value', 0, 'tag','tag_cb_draw_E');
+      
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_cb2 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','draw_PPM', 'value', 0, 'tag','tag_cb_draw_PPM');
   
-  set(guihandles.tag_rb_draw_X,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_Y,guihandles.tag_rb_draw_Z})
-  set(guihandles.tag_rb_draw_Y,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_X,guihandles.tag_rb_draw_Z})
-  set(guihandles.tag_rb_draw_Z,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_Y,guihandles.tag_rb_draw_X})
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0];
+    h_fig2_cb3 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','X = const', 'value', 0, 'tag','tag_cb_draw_X');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_cb4 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','Y = const', 'value', 0, 'tag','tag_cb_draw_Y');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_cb5 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','Z = const', 'value', 0, 'tag','tag_cb_draw_Z');  
+      
+    h_button_position = h_button_position0 - [0, num_str++*(step_button + height_button) ,0 ,0];;
+    h_fig2_cb6 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','contour', 'value', 0, 'tag','tag_cb_draw_contour');
+    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_cb7 = uicontrol(h_fig2,'style','checkbox','position',h_button_position,...
+      'string','surface', 'value', 0, 'tag','tag_cb_draw_surf');
+      
+    set(guihandles.tag_cb_draw_E,'value',is_draw_E)
+    set(guihandles.tag_cb_draw_PPM,'value',is_draw_PPM)
+    set(guihandles.tag_cb_draw_X,'value',sum(select_plane_calc == 1));
+    set(guihandles.tag_cb_draw_Y,'value',sum(select_plane_calc == 2));
+    set(guihandles.tag_cb_draw_Z,'value',sum(select_plane_calc == 3));
+    set(guihandles.tag_cb_draw_contour,'value',is_draw_contour)
+    set(guihandles.tag_cb_draw_surf,'value',is_draw_surf)
     
-  set(guihandles.tag_rb_draw_contour,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_surf,[]});
-  set(guihandles.tag_rb_draw_surf,'callback',{@func_push_rb,guihandles,...
-    guihandles.tag_rb_draw_contour,[]});
     
-%  h_fig2 = figure(2);
-%  set(h_fig2,'menubar','none','dockcontrols','on','windowstyle','docked');
-%  get(h_fig2);
+    h_button_position = h_button_position0 - [-2*(weigth_button+step_button), num_str++*(step_button + height_button) ,0 ,0];
+%    h_button_position = h_button_position + [weigth_button+step_button,0 ,0 ,0];
+    h_fig2_pb1 = uicontrol(h_fig2,'style','pushbutton','position',h_button_position,...
+      'string','calculation', 'value', 0, 'tag','tag_pb_calc'); 
+      
+      %  if 0
+      %    % callbacks  
+      %    set(guihandles.tag_cb_draw_E,'callback',{@func_push_cb,guihandles});
+      %    set(guihandles.tag_cb_draw_PPM,'callback',{@func_push_cb,guihandles});
+      %    set(guihandles.tag_cb_draw_X,'callback',{@func_push_cb,guihandles});
+      %    set(guihandles.tag_cb_draw_Y,'callback',{@func_push_cb,guihandles});
+      %    set(guihandles.tag_cb_draw_Z,'callback',{@func_push_cb,guihandles});
+      %    set(guihandles.tag_cb_draw_contour,'callback',{@func_push_cb,guihandles});
+      %    set(guihandles.tag_cb_draw_surf,'callback',{@func_push_cb,guihandles});
+      %  end
   
+%  figure('menubar','none')
+  toc
 endfunction
 
 function func_push_rb(a,b,guihandles,c,d)
@@ -403,10 +551,18 @@ function func_push_rb(a,b,guihandles,c,d)
                 2*get(guihandles.tag_rb_draw_PPM,'value')+... 
                 2*get(guihandles.tag_rb_draw_surf,'value')+... 
                   get(guihandles.tag_rb_draw_contour,'value');
-  get_children = get(0,'children');                
-  for ii = 2 : length(get(0,'children'))
-    set(figure(get_children(ii)),'visible','off');
+  get_children = get(0,'children');      
+  is_there = 0;
+  for ii = 1 : length(get(0,'children'))
+    if get_children(ii) > 9
+      set(figure(get_children(ii)),'visible','off');
+    end
+    if number_fig==get_children(ii)
+      is_there++;
+    end
   end
-  set(figure(number_fig),'visible','on');
+  if is_there
+    set(figure(number_fig),'visible','on');
+  end
 endfunction
 
